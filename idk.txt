@@ -1,0 +1,14 @@
+int getMap1(std::map<TreeNode<int>*, funnyStruct> mapOfTree){
+    int sum,sum1;
+    while(mapOfTree.size > 1){
+        for(auto& i: mapOfTree){
+            if(i.first->children.size() == i.second.size()){
+                sum1 = maxNum(i.second.vecOfChild);
+                i.second.value+=sum1;
+                map[i.first->parent].second.vecOfChild.push_back(i.first);
+                map.erase(i);
+            }
+        }
+    }
+    return 0;
+}
