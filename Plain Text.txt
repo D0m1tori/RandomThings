@@ -1,0 +1,231 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+
+
+struct funnyStruct{
+    std::vector<TreeNode<int>*> vecOfChild;
+    int value;
+
+};
+// Класс узла дерева
+template <typename T>
+class TreeNode {
+public:
+    T data;
+    int id;                             
+    TreeNode<T>* parent;               
+    std::vector<TreeNode<T>*> children;
+    // Конструктор узла
+    explicit TreeNode(const T& value)
+        : data(value), parent(nullptr)
+    {
+    }
+    void addChild(TreeNode<T>* child) {
+        if (!child) return;
+        child->parent = this;          // Назначаем родителя
+        children.push_back(child);
+    }
+    /*
+    void addNewChild(auto* a) {
+        TreeNode<T>* child = createNode(a);
+        if (!child) return;
+        child->parent = this;
+        children.push_back(child);
+    }
+    */
+};
+
+// Класс дерева, хранящий указатель на корень
+template <typename T>
+class Tree {
+public:
+    using Node = TreeNode<T>; // Удобный псевдоним
+
+    // Конструктор без параметров: дерево изначально пустое
+    Tree() : root(nullptr) {}
+
+    // Деструктор: при необходимости можно рекурсивно освобождать узлы
+    ~Tree() {
+        clear(root);
+    }
+
+    
+    Node* createNode(const T& data) {
+        return new Node(data);
+    }
+
+    // Установить корень дерева
+    void setRoot(Node* node) {
+        root = node;
+        if (root) {
+            root->parent = nullptr; // У корня нет родителя
+        }
+    }
+
+    // Получить указатель на корень
+    Node* getRoot() const {
+        return root;
+    }
+
+    // Очистить все узлы дерева (рекурсивно)
+    void clear(Node* node) {
+        if (!node) return;
+        for (auto* child : node->children) {
+            clear(child);
+        }
+        delete node;
+    }
+
+private:
+    Node* root; // Указатель на корень
+};
+
+
+
+void outputCildren(TreeNode<int>* a,int length){
+    int curLength = length;
+    for (auto* child : a->children) {
+        for(int i=0;i<curLength;i++){
+            std::cout<<"  ";
+        }
+        std::cout << child->data << std::endl;
+        length++;
+        outputCildren(child,length);
+        length = curLength;
+    }
+}
+void outputNode(TreeNode<int>* a,bool b){
+    std::cout << a->data << std::endl;
+    if(b){
+        outputCildren(a,1);
+    }
+
+}
+
+
+
+int outputSum1(TreeNode<int>* a){
+    int sumOfChildren=0;
+    for (auto* child : a->children) {
+        sumOfChildren+=child->data;
+        //std::cout<<"+"<< child->data<< std::endl;
+        int sum1 = outputSum1(child);
+        //std::cout<<"++"<< sum1<< std::endl;
+        sumOfChildren+=sum1;
+
+    }
+    return sumOfChildren;
+}
+int outputSum(TreeNode<int>* a){
+    int sum= a->data;
+    sum += outputSum1(a);
+    return sum;
+
+}
+
+
+
+int outputSumOfleafs1(TreeNode<int>* a){
+    int sumOfChildren=0;
+    for (auto* child : a->children) {
+        if(child->children.size() == 0){
+            sumOfChildren+=child->data;
+        }
+        //std::cout<<"+"<< child->data<< std::endl;
+        int sum1 = outputSumOfleafs1(child);
+        //std::cout<<"++"<< sum1<< std::endl;
+        sumOfChildren+=sum1;
+
+    }
+    return sumOfChildren;
+}
+int outputSumOfleafs(TreeNode<int>* a){
+    int sum= 0;
+    if(a->children.size()==0){
+        sum+=a->data;
+    }else{
+        sum += outputSumOfleafs1(a);
+    }
+    return sum;
+}
+
+
+std::vector<TreeNode<int>*> getLeafs(TreeNode<int>* a){
+    std::vector<TreeNode<int>*> listOfLeafs,gottenList;
+    if(a->children.size()==0){
+        return {a};   
+    }else{
+        for(auto* clild: a->children){
+            gottenList = getLeafs(clild);
+            for(int i =0;i<gottenList.size();i++){
+                listOfLeafs.push_back(gottenList[i]);
+            }
+        }
+    }
+    return listOfLeafs;
+}
+
+std::map<TreeNode<int>*, funnyStruct> getMap(TreeNode<int>* a){
+    std::map<TreeNode<int>*, funnyStruct> listOfLeafs,gottenList;
+    funnyStruct b;
+    b.value = a->data;
+    b.vecOfChild;
+    listOfLeafs.emplace(a,b);
+    for(auto* clild: a->children){
+        gottenList = getMap(clild);
+        for(auto& item : gottenList){
+            listOfLeafs.emplace(item.first,item.second);
+        }   
+        
+    }
+    
+    return listOfLeafs;
+}
+
+int getMap1(std::map<TreeNode<int>*, funnyStruct> mapOfTree){
+    
+    return 0;
+}
+
+// Пример использования
+int main() {
+    // Создадим дерево, где данные — это строки
+    Tree<int> tree;
+    std::map<int*,std::vector<int*>> a;
+    // Создаём несколько узлов
+    auto* Node1 = tree.createNode(1);
+    auto* Node2 = tree.createNode(2);
+    auto* Node3 = tree.createNode(3);
+    auto* Node4 = tree.createNode(4);
+    auto* Node5 = tree.createNode(3);
+    auto* Node6 = tree.createNode(2);
+    auto* Node7 = tree.createNode(1);
+    auto* Node8 = tree.createNode(0);
+    auto* Node9 = tree.createNode(1);
+    auto* Node10 = tree.createNode(2);
+
+    // Строим иерархию
+    tree.setRoot(Node1);
+    Node1->addChild(Node2);
+    Node1->addChild(Node3);
+    Node3->addChild(Node4);
+    Node3->addChild(Node5);
+    Node3->addChild(Node6);
+    Node5->addChild(Node9);
+    Node4->addChild(Node7);
+    Node4->addChild(Node8);
+    Node8->addChild(Node10);
+
+    auto* root = tree.getRoot();
+    //root = Node4;
+    outputNode(root,true);
+    int sum = outputSum(root);
+    int sumOfleafs = outputSumOfleafs(root);
+    std::cout << sum<< std::endl;
+    std::cout << sumOfleafs<< std::endl;
+
+    // По выходу из main сработает деструктор: clear() рекурсивно удалит все узлы
+    return 0;
+}
